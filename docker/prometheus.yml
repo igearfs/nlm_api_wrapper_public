@@ -1,0 +1,26 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  ## config for the multiple Redis targets that the exporter will scrape
+  - job_name: 'redis_exporter_targets'
+    static_configs:
+      - targets:
+          - redis://nlm_redis_1:6379
+          - redis://nlm_redis_2:6380
+    metrics_path: /scrape
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: nlm_redis_exporter_master:9121
+
+  - job_name: 'redis_master'
+    static_configs:
+      - targets: ['nlm_redis_exporter_master:9121']  # Adjust based on your setup
+
+  - job_name: 'load-balancer-metrics'
+    static_configs:
+      - targets: ['nlm_haproxy:8405']

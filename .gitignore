@@ -1,0 +1,77 @@
+# User-specific files
+.idea/
+*.iml
+*.ipr
+*.iws
+./docker/nlm_*
+
+# Default ignored files
+/shelf/
+/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+
+
+# Build directories
+out/
+build/
+target/
+
+# Dependency directories
+*.jar
+*.war
+*.ear
+lib/
+
+# Logs
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+.idea/workspace.xml
+
+# JetBrains specific files
+*.sublime-workspace
+*.sublime-project
+
+# Other files to ignore
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.tar
+*.7z
+
+# Ignore Maven files
+maven-repository/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+
+# Ignore Gradle files
+.gradle/
+build/
+
+# Ignore IntelliJ's system files
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/assetWizard.xml
+.idea/other.xml
+.idea/vcs.xml
+
+# Ignore local history
+.localhistory/
+
+# Ignore configuration files
+*.hprof
+*.orig
+*.swp
+*.swo

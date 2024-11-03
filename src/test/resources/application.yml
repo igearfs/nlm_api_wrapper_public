@@ -1,0 +1,22 @@
+
+spring:
+  redis:
+    host: localhost  # Use localhost for external access
+    port: 6379       # Port that HAProxy listens on for Redis
+
+nlm:
+  api:
+    icd10:
+      base-url: "https://clinicaltables.nlm.nih.gov/api/icd10cm/v3/search"
+
+kafka:
+  bootstrap-servers: "localhost:9092"  # Keep as localhost to connect through HAProxy
+  producer:
+    key-serializer: "org.apache.kafka.common.serialization.StringSerializer"
+    value-serializer: "io.confluent.kafka.serializers.KafkaAvroSerializer"
+  schema-registry-url: "http://localhost:8081"  # This remains the same
+  topics:
+    icd10-success: "icd10-success"
+    icd10-error: "icd10-error"
+    rxnorm-error: "rxnorm-error"
+    icd10-messages: "icd10-messages"

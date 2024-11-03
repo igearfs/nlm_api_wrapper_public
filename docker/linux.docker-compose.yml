@@ -1,0 +1,220 @@
+services:
+  nlm_redis_1:
+    image: redis:latest
+    container_name: nlm_redis_1
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./nlm_redis_data_1:/data
+    command: "redis-server"
+    networks:
+      - nlm_app_network
+
+  nlm_redis_2:
+    image: redis:latest
+    container_name: nlm_redis_2
+    ports:
+      - "6380:6379"
+    volumes:
+      - ./nlm_redis_data_2:/data
+    command: "redis-server --port 6380 --replicaof nlm_redis_1 6379"
+    networks:
+      - nlm_app_network
+
+
+  nlm_kafka1:
+    build:
+      context: .
+      dockerfile: Dockerfile.kafka
+    container_name: nlm_kafka1
+    hostname: nlm_kafka1
+    ports:
+      - "9092:9092"  # External port for Kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_LISTENERS: 'INTERNAL://nlm_kafka1:29092,CONTROLLER://nlm_kafka1:29093,EXTERNAL://0.0.0.0:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://nlm_kafka1:29092,EXTERNAL://localhost:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@nlm_kafka1:29093,2@nlm_kafka2:29093,3@nlm_kafka3:29093'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_LOG_DIRS: '/var/lib/kafka/logs'
+      CLUSTER_ID: 'nlm-cluster-id'
+    volumes:
+      - nlm_kafka1_data:/var/lib/kafka/data
+      - nlm_kafka1_logs:/var/lib/kafka/logs
+    networks:
+      - nlm_app_network
+
+  nlm_kafka2:
+    build:
+      context: .
+      dockerfile: Dockerfile.kafka
+    container_name: nlm_kafka2
+    hostname: nlm_kafka2
+    ports:
+      - "9093:9093"  # External port for Kafka
+    environment:
+      KAFKA_NODE_ID: 2
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_LISTENERS: 'INTERNAL://nlm_kafka2:29092,CONTROLLER://nlm_kafka2:29093,EXTERNAL://0.0.0.0:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://nlm_kafka2:29092,EXTERNAL://localhost:9093'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@nlm_kafka1:29093,2@nlm_kafka2:29093,3@nlm_kafka3:29093'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_LOG_DIRS: '/var/lib/kafka/logs'
+      CLUSTER_ID: 'nlm-cluster-id'
+    volumes:
+      - nlm_kafka2_data:/var/lib/kafka/data
+      - nlm_kafka2_logs:/var/lib/kafka/logs
+    networks:
+      - nlm_app_network
+
+  nlm_kafka3:
+    build:
+      context: .
+      dockerfile: Dockerfile.kafka
+    container_name: nlm_kafka3
+    hostname: nlm_kafka3
+    ports:
+      - "9094:9094"  # External port for Kafka
+    environment:
+      KAFKA_NODE_ID: 3
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_LISTENERS: 'INTERNAL://nlm_kafka3:29092,CONTROLLER://nlm_kafka3:29093,EXTERNAL://0.0.0.0:9094'
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://nlm_kafka3:29092,EXTERNAL://localhost:9094'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@nlm_kafka1:29093,2@nlm_kafka2:29093,3@nlm_kafka3:29093'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_LOG_DIRS: '/var/lib/kafka/logs'
+      CLUSTER_ID: 'nlm-cluster-id'
+    volumes:
+      - nlm_kafka3_data:/var/lib/kafka/data
+      - nlm_kafka3_logs:/var/lib/kafka/logs
+    networks:
+      - nlm_app_network
+
+  nlm_schema_registry:
+    image: confluentinc/cp-schema-registry:latest
+    container_name: nlm_schema_registry
+    hostname: nlm_schema_registry
+    ports:
+      - "8082:8081"  # Changed to avoid conflict
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: nlm_schema_registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'nlm_kafka1:29092,nlm_kafka2:29092,nlm_kafka3:29092'
+      SCHEMA_REGISTRY_LISTENERS: 'http://0.0.0.0:8081'
+    depends_on:
+      - nlm_kafka1
+      - nlm_kafka2
+      - nlm_kafka3
+    networks:
+      - nlm_app_network
+
+  nlm_haproxy:
+    image: haproxy:latest
+    container_name: nlm_haproxy
+    ports:
+      - "8080:8080"
+      - "8404:8404"
+      - "1936:1936"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    depends_on:
+      - nlm_redis_1
+      - nlm_redis_2
+      - nlm_kafka1
+      - nlm_kafka2
+      - nlm_kafka3
+    networks:
+      - nlm_app_network
+
+  nlm_dbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: nlm_dbeaver
+    ports:
+      - "8081:8080"
+    networks:
+      - nlm_app_network
+    volumes:
+      - nlm_dbeaver_data:/root/.local/share/DBeaverData
+
+  nlm_prometheus:
+    image: prom/prometheus:latest
+    container_name: nlm_prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - nlm_app_network
+
+  nlm_grafana:
+    image: grafana/grafana:latest
+    container_name: nlm_grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - nlm_prometheus
+    networks:
+      - nlm_app_network
+    volumes:
+      - nlm_grafana_data:/var/lib/grafana  # Persistent storage
+
+  nlm_redis_exporter_master:
+    image: oliver006/redis_exporter:latest
+    container_name: nlm_redis_exporter_master
+    ports:
+      - "9121:9121"
+    networks:
+      - nlm_app_network
+    environment:
+      REDIS_ADDR: redis://nlm_redis_1:6379  # Connect to both Redis instances
+
+#  haproxy-exporter:
+#    image: prom/haproxy-exporter:latest
+#    ports:
+#      - "9122:9121"    # Exporter metrics endpoint
+#    environment:
+#      - STATISTICS_URL=http://haproxy:1936/stats
+#    networks:
+#      - nlm_app_network
+
+
+volumes:
+  nlm_kafka1_data:
+    driver: local
+  nlm_kafka1_logs:
+    driver: local
+  nlm_kafka2_data:
+    driver: local
+  nlm_kafka2_logs:
+    driver: local
+  nlm_kafka3_data:
+    driver: local
+  nlm_kafka3_logs:
+    driver: local
+  nlm_redis_data_1:
+    driver: local
+  nlm_redis_data_2:
+    driver: local
+  nlm_dbeaver_data:
+    driver: local
+  nlm_grafana_data:
+    driver: local
+
+networks:
+  nlm_app_network:
+    driver: bridge

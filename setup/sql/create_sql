@@ -1,0 +1,40 @@
+-- Create the database (replace with your desired database name)
+CREATE DATABASE nlm_api;
+
+-- Connect to the database
+\c nlm_api;
+
+-- Create the nlm schema
+CREATE SCHEMA nlm;
+
+-- Create a sequence for generating unique identifiers for icd10_cache
+CREATE SEQUENCE nlm.icd10_cache_id_seq;
+
+-- Create the icd10_cache table in the nlm schema
+CREATE TABLE nlm.icd10_cache (
+    code TEXT,                       -- Code associated with the record
+    guid TEXT,                       -- Unique identifier from the NLM library (string)
+    id BIGINT DEFAULT nextval('nlm.icd10_cache_id_seq'),  -- Unique identifier from the sequence
+    value TEXT,                     -- Value associated with the code
+    insert_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Timestamp for when the record was inserted
+    update_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- Timestamp for the last update
+);
+
+-- Create a sequence for the rxnorm_cache table
+CREATE SEQUENCE nlm.rxnorm_cache_id_seq;
+
+-- Create the rxnorm_cache table in the nlm schema
+CREATE TABLE nlm.rxnorm_cache (
+    code TEXT,                       -- Code associated with the record
+    guid TEXT,                       -- Unique identifier from the NLM library (string)
+    id BIGINT DEFAULT nextval('nlm.rxnorm_cache_id_seq'),  -- Unique identifier from the sequence
+    value TEXT,                     -- Value associated with the code
+    insert_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Timestamp for when the record was inserted
+    update_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- Timestamp for the last update
+);
+
+-- Grant all privileges on the nlm schema to the postgres user
+GRANT ALL PRIVILEGES ON SCHEMA nlm TO postgres;
+
+-- Grant all privileges on all tables in the nlm schema to the postgres user
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA nlm TO postgres;

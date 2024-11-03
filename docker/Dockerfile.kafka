@@ -1,0 +1,8 @@
+# Dockerfile.kafka
+FROM confluentinc/cp-kafka:latest
+
+# Create necessary directories
+RUN mkdir -p /var/lib/kafka/logs
+
+# Set permissions (optional, adjust according to your needs)
+RUN chown -R appuser:appuser  /var/lib/kafka
