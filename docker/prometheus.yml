@@ -24,3 +24,14 @@ scrape_configs:
   - job_name: 'load-balancer-metrics'
     static_configs:
       - targets: ['nlm_haproxy:8405']
+
+  - job_name: 'docker-monitor'
+
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 120s
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+      - targets: ['localhost:9090','nlm_cadvisor:8080','nlm_node_exporter:9100']

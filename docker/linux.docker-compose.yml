@@ -160,18 +160,9 @@ services:
       - "9090:9090"
     networks:
       - nlm_app_network
-
-  nlm_grafana:
-    image: grafana/grafana:latest
-    container_name: nlm_grafana
-    ports:
-      - "3000:3000"
-    depends_on:
-      - nlm_prometheus
-    networks:
-      - nlm_app_network
-    volumes:
-      - nlm_grafana_data:/var/lib/grafana  # Persistent storage
+    links:
+      - nlm_cadvisor:nlm_cadvisor
+      - nlm_node_exporter:nlm_node_exporter
 
   nlm_redis_exporter_master:
     image: oliver006/redis_exporter:latest
@@ -183,17 +174,48 @@ services:
     environment:
       REDIS_ADDR: redis://nlm_redis_1:6379  # Connect to both Redis instances
 
-#  haproxy-exporter:
-#    image: prom/haproxy-exporter:latest
-#    ports:
-#      - "9122:9121"    # Exporter metrics endpoint
-#    environment:
-#      - STATISTICS_URL=http://haproxy:1936/stats
-#    networks:
-#      - nlm_app_network
+  nlm_node_exporter:
+    image: prom/node-exporter:latest
+    container_name: nlm_monitoring_node_exporter
+    restart: unless-stopped
+    expose:
+      - 9100
 
+  nlm_cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: nlm_monitoring_cadvisor
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    expose:
+      - 8080
+
+  nlm_grafana:
+    image: grafana/grafana:latest
+    container_name: nlm_grafana  # Container name with nlm_ prefix as requested
+    restart: unless-stopped
+    links:
+      - nlm_prometheus:nlm_prometheus
+    ports:
+      - "3000:3000"
+    depends_on:
+      - nlm_prometheus
+    networks:
+      - nlm_app_network
+    volumes:
+      - ./nlm_grafana/nlm_grafana_data:/var/lib/grafana:rw
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=MYPASSWORD
+      - GF_USERS_ALLOW_SIGN_UP=false
 
 volumes:
+  nlm_redis_data_1:
+    driver: local
+  nlm_redis_data_2:
+    driver: local
   nlm_kafka1_data:
     driver: local
   nlm_kafka1_logs:
@@ -206,13 +228,13 @@ volumes:
     driver: local
   nlm_kafka3_logs:
     driver: local
-  nlm_redis_data_1:
-    driver: local
-  nlm_redis_data_2:
-    driver: local
   nlm_dbeaver_data:
     driver: local
-  nlm_grafana_data:
+  nlm_prometheus_data:
+    driver: local
+  nlm_grafana:
+    driver: local
+  nlm_monitoring_cadvisor:
     driver: local
 
 networks:
