@@ -25,7 +25,16 @@ Sponsored by: In-Game Event, A Red Flag Syndicate LLC.
 >   - RXNorm - in progress
 
 ## End Goal
-To build upon this making a massive health care monitoring system on a personal and global level.
+To build upon this project, creating a massive health care monitoring system on a personal and global level. A full healthcare data platform!
+- Collect and normalize data FHIR, X12, CCD, HL7, Flat files
+- Analyze data based on factors, labs, eating habits, environmental factors
+  - Vaccines
+  - Medication issues
+  - Pollution (Air quality, water quality, etc)
+- Exercise habbits aka Life Style
+- Living Location
+- Pre-disposed data birth conditions (DNA)
+- Food Quality (Chemicals in what you eat, where was the food grown? Do we have soil results for what the food is taking in for nutrients)
 
 ## First Goal
 Be able to check data and push out monitoring and reports on that data failures and success while building the end system.
