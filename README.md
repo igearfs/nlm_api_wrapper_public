@@ -24,6 +24,10 @@ Sponsored by: In-Game Event, A Red Flag Syndicate LLC.
 >   - ICD10 - functioning
 >   - RXNorm - in progress
 
+## End Goal
+To build upon this making a massive health care monitoring system on a personal and global level.
+
+
 ## Overview
 
 The NLM API Integration project provides a seamless interface for interacting with the National Library of Medicine (
