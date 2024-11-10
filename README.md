@@ -35,6 +35,9 @@ To build upon this project, creating a massive health care monitoring system on 
 - Living Location
 - Pre-disposed data birth conditions (DNA)
 - Food Quality (Chemicals in what you eat, where was the food grown? Do we have soil results for what the food is taking in for nutrients)
+- Maybe AI at some point (we all know there is more to detecting a person's health issues than just 1's and 0's) AI is useful but humans should make the final decision.
+- Natural and functional medicine approaches as well as western medicine.
+- Transparency and informed consent.
 
 ## First Goal
 Be able to check data and push out monitoring and reports on that data failures and success while building the end system.
