@@ -27,6 +27,8 @@ Sponsored by: In-Game Event, A Red Flag Syndicate LLC.
 ## End Goal
 To build upon this making a massive health care monitoring system on a personal and global level.
 
+## First Goal
+Be able to check data and push out monitoring and reports on that data failures and success while building the end system.
 
 ## Overview
 
