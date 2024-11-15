@@ -5,6 +5,13 @@ Sponsored by: In-Game Event, A Red Flag Syndicate LLC.
 # Important Note
 
 > **⚠️ This project is NOT production-ready!**  
+> 
+> Make sure you follow HIPAA standards like SSL communication. Right new it's all in one container internal talking.
+> 
+> If you have external apps like redis make sure it's SSL!
+> https://www.hhs.gov/hipaa/for-professionals/privacy/laws-regulations/index.html
+> https://www.healthit.gov/topic/privacy-security-and-hipaa/security-risk-assessment-tool
+> 
 > Please use it for development and testing purposes only. 
 > Ensure thorough testing and review before deploying to a live environment.
 
