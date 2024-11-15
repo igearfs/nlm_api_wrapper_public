@@ -3,54 +3,54 @@ name: Maven Test with OpenJDK 21 and Docker Compose
 on:
   push:
     branches:
-      - main   # Trigger this on push to the main branch, adjust as needed
+      - main
   pull_request:
     branches:
-      - main   # Trigger this on pull request to the main branch, adjust as needed
+      - main
 
 jobs:
   test:
-    runs-on: ubuntu-latest  # Runs the job on the latest Ubuntu environment
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2   # Checkout the repository code
+        uses: actions/checkout@v3   # Updated to use the latest version of actions/checkout
 
       - name: Install Docker
         run: |
           sudo apt-get update
-          sudo apt-get install -y docker.io  # Install Docker on the GitHub runner
+          sudo apt-get install -y docker.io
 
       - name: Install OpenJDK 21
         run: |
           sudo apt update
-          sudo apt install -y openjdk-21-jdk  # Install OpenJDK 21 from Ubuntu Universe repository
+          sudo apt install -y openjdk-21-jdk
 
       - name: Set JAVA_HOME
         run: |
-          echo "JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64" >> $GITHUB_ENV  # Set JAVA_HOME environment variable
+          echo "JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64" >> $GITHUB_ENV
 
       - name: Verify Java version
-        run: java -version  # Verify the Java version to ensure it's correct
+        run: java -version
 
       - name: Cache Maven dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3   # Updated to actions/cache@v3
         with:
-          path: ~/.m2/repository  # Cache Maven dependencies to speed up subsequent builds
+          path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
 
       - name: Start Docker Compose
         run: |
-          docker-compose -f docker/linux.docker-compose.yml up -d  # Point to the correct Docker Compose file in the 'docker' folder
+          docker-compose -f docker/linux.docker-compose.yml up -d
 
       - name: Wait for services to be ready (optional)
         run: |
-          ./wait-for-it.sh db:5432 --timeout=30 -- echo "Database is ready!"  # Example to wait for a service like a DB to be ready
+          ./wait-for-it.sh db:5432 --timeout=30 -- echo "Database is ready!"
 
       - name: Run Maven tests
-        run: mvn test   # Only run tests, without compiling the full project
+        run: mvn test
 
       - name: Shut down Docker Compose
-        run: docker-compose -f docker/linux.docker-compose.yml down  # Stop the services after tests finish
+        run: docker-compose -f docker/linux.docker-compose.yml down
