@@ -1,0 +1,40 @@
+name: Maven Test with OpenJDK 21
+
+on:
+  push:
+    branches:
+      - main   # Trigger this on push to the main branch, adjust as needed
+  pull_request:
+    branches:
+      - main   # Trigger this on pull request to the main branch, adjust as needed
+
+jobs:
+  test:
+    runs-on: ubuntu-latest  # Runs the job on the latest Ubuntu environment
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2   # Checkout the repository code
+
+      - name: Install OpenJDK 21
+        run: |
+          sudo apt update
+          sudo apt install -y openjdk-21-jdk  # Install OpenJDK 21 from Ubuntu Universe repository
+
+      - name: Set JAVA_HOME
+        run: |
+          echo "JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64" >> $GITHUB_ENV  # Set JAVA_HOME environment variable
+
+      - name: Verify Java version
+        run: java -version  # Verify the Java version to ensure it's correct
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository  # Cache Maven dependencies to speed up subsequent builds
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Run Maven tests
+        run: mvn test   # Only run tests, without compiling the full project
