@@ -1,4 +1,4 @@
-name: Maven Test with OpenJDK 21
+name: Maven Test with OpenJDK 21 and Docker Compose
 
 on:
   push:
@@ -15,6 +15,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2   # Checkout the repository code
+
+      - name: Install Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io  # Install Docker on the GitHub runner
 
       - name: Install OpenJDK 21
         run: |
@@ -36,5 +41,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Start Docker Compose
+        run: |
+          docker-compose -f docker/linux.docker-compose.yml up -d  # Point to the correct Docker Compose file in the 'docker' folder
+
+      - name: Wait for services to be ready (optional)
+        run: |
+          ./wait-for-it.sh db:5432 --timeout=30 -- echo "Database is ready!"  # Example to wait for a service like a DB to be ready
+
       - name: Run Maven tests
         run: mvn test   # Only run tests, without compiling the full project
+
+      - name: Shut down Docker Compose
+        run: docker-compose -f docker/linux.docker-compose.yml down  # Stop the services after tests finish
