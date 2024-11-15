@@ -3,36 +3,46 @@ name: Maven Test with OpenJDK 21 and Docker Compose
 on:
   push:
     branches:
-      - main
+      - main   # Trigger this on push to the main branch
   pull_request:
     branches:
-      - main
+      - main   # Trigger this on pull request to the main branch
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Runs the job on the latest Ubuntu environment
 
     steps:
+      # Step 1: Checkout the code
       - name: Checkout code
-        uses: actions/checkout@v3   # Updated to use the latest version of actions/checkout
+        uses: actions/checkout@v3   # Use the latest version of actions/checkout
 
-      - name: Install Docker
+      # Step 2: Install Docker from the official Docker repository
+      - name: Install Docker from Docker's Official Repository
         run: |
           sudo apt-get update
-          sudo apt-get install -y docker.io
+          sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/docker-archive-keyring.gpg
+          sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+          sudo apt-get update
+          sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 
+      # Step 3: Install OpenJDK 21
       - name: Install OpenJDK 21
         run: |
           sudo apt update
           sudo apt install -y openjdk-21-jdk
 
+      # Step 4: Set JAVA_HOME environment variable
       - name: Set JAVA_HOME
         run: |
-          echo "JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64" >> $GITHUB_ENV
+          echo "JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64" >> $GITHUB_ENV  # Set JAVA_HOME environment variable
 
+      # Step 5: Verify the Java version
       - name: Verify Java version
-        run: java -version
+        run: java -version  # Verify the Java version to ensure it's correct
 
+      # Step 6: Cache Maven dependencies
       - name: Cache Maven dependencies
         uses: actions/cache@v3   # Updated to actions/cache@v3
         with:
@@ -41,16 +51,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      # Step 7: Start Docker Compose services
       - name: Start Docker Compose
         run: |
-          docker-compose -f docker/linux.docker-compose.yml up -d
+          docker-compose -f docker/linux.docker-compose.yml up -d  # Start Docker Compose in detached mode
 
+      # Step 8: Optionally wait for services to be ready (e.g., database)
       - name: Wait for services to be ready (optional)
         run: |
-          ./wait-for-it.sh db:5432 --timeout=30 -- echo "Database is ready!"
+          ./wait-for-it.sh db:5432 --timeout=30 -- echo "Database is ready!"  # Wait for DB or any other service to be ready
 
+      # Step 9: Run Maven tests
       - name: Run Maven tests
-        run: mvn test
+        run: mvn test  # Only run tests, without compiling the full project
 
+      # Step 10: Shut down Docker Compose services after tests
       - name: Shut down Docker Compose
-        run: docker-compose -f docker/linux.docker-compose.yml down
+        run: docker-compose -f docker/linux.docker-compose.yml down  # Stop and remove Docker Compose services
