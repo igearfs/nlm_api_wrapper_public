@@ -17,7 +17,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3   # Use the latest version of actions/checkout
 
-      # Step 2: Install Docker from the official Docker repository
+      # Step 2: Install Docker and Docker Compose v2
       - name: Install Docker from Docker's Official Repository
         run: |
           sudo apt-get update
@@ -26,6 +26,8 @@ jobs:
           sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
           sudo apt-get update
           sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+          # Install Docker Compose v2 (as part of the Docker CLI)
+          sudo apt-get install -y docker-compose-plugin
 
       # Step 3: Install OpenJDK 21
       - name: Install OpenJDK 21
@@ -51,10 +53,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      # Step 7: Start Docker Compose services
+      # Step 7: Start Docker Compose services (using `docker compose` v2)
       - name: Start Docker Compose
         run: |
-          docker-compose -f docker/linux.docker-compose.yml up -d  # Start Docker Compose in detached mode
+          docker compose -f docker/linux.docker-compose.yml up -d  # Start Docker Compose in detached mode
 
       # Step 8: Optionally wait for services to be ready (e.g., database)
       - name: Wait for services to be ready (optional)
@@ -67,4 +69,4 @@ jobs:
 
       # Step 10: Shut down Docker Compose services after tests
       - name: Shut down Docker Compose
-        run: docker-compose -f docker/linux.docker-compose.yml down  # Stop and remove Docker Compose services
+        run: docker compose -f docker/linux.docker-compose.yml down  # Stop and remove Docker Compose services
