@@ -131,7 +131,19 @@
             <version>5.1.5</version>
         </dependency>
 
+        <!-- Spring Core and JDBC support -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>5.3.10</version> <!-- Adjust version as needed -->
+        </dependency>
 
+        <!-- Database Driver (e.g., PostgreSQL) -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.23</version> <!-- Adjust version as needed -->
+        </dependency>
         <!-- Hibernate Core -->
         <dependency>
             <groupId>org.hibernate.orm</groupId>

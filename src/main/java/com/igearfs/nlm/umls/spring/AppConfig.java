@@ -82,8 +82,20 @@ public class AppConfig
 		}
 		System.out.println("**********************************************************************");
 	}
-	
-	
+
+	@Bean
+	public DataSource dataSource() {
+		DriverManagerDataSource dataSource = new DriverManagerDataSource();
+
+		// Configure your database connection details
+		dataSource.setDriverClassName("org.postgresql.Driver");
+		dataSource.setUrl("jdbc:postgresql://localhost:5432/nlm_databasee");
+		dataSource.setUsername("postgres");
+		dataSource.setPassword("postgres");
+
+		return dataSource;
+	}
+
 	@Bean
 	public ICD10ApiFacade icd10ApiFacade()
 	{

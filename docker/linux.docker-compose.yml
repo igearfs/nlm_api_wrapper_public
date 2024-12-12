@@ -151,6 +151,35 @@ services:
       - nlm_kafka3
     networks:
       - nlm_app_network
+  # Citus Master Node
+  nlm_citusdata_postgres_master:
+    image: citusdata/citus:12.1
+    container_name: nlm_citusdata_postgres_master
+    labels:
+      - "com.citusdata.role=Master"
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./nlm_citusdata_postgres_master/data:/var/lib/postgresql/data  # Updated volume name
+      - ./postgres_init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - nlm_app_network
+
+  nlm_pgadmin:
+    image: dpage/pgadmin4:latest  # Use the latest pgAdmin image
+    container_name: nlm_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"  # Default admin email
+      PGADMIN_DEFAULT_PASSWORD: "admin"  # Default admin password
+    ports:
+      - "8888:80"  # Expose pgAdmin on port 80
+    volumes:
+      - ./pgadmin_data:/var/lib/pgadmin  # Persist pgAdmin data (user preferences, etc.)
+    networks:
+      - nlm_app_network
 
   nlm_dbeaver:
     image: dbeaver/cloudbeaver:latest
@@ -205,9 +234,10 @@ services:
       - 8080
 
   nlm_grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.4.0
     container_name: nlm_grafana  # Container name with nlm_ prefix as requested
     restart: unless-stopped
+    user: "${UID}:${GID}"
     links:
       - nlm_prometheus:nlm_prometheus
     ports:
@@ -217,12 +247,16 @@ services:
     networks:
       - nlm_app_network
     volumes:
-      - ./nlm_grafana/nlm_grafana_data:/var/lib/grafana:rw
+      - ./nlm_grafana_data:/var/lib/grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=MYPASSWORD
       - GF_USERS_ALLOW_SIGN_UP=false
 
 volumes:
+  pgadmin_data:
+    driver: local
+  nlm_citusdata_postgres_master:
+    driver: local
   nlm_redis_data_1:
     driver: local
   nlm_redis_data_2:
@@ -243,7 +277,7 @@ volumes:
     driver: local
   nlm_prometheus_data:
     driver: local
-  nlm_grafana:
+  nlm_grafana_data:
     driver: local
   nlm_monitoring_cadvisor:
     driver: local
