@@ -43,6 +43,8 @@ To build upon this project, creating a massive health care monitoring system on 
 - Pre-disposed data birth conditions (DNA)
 - Food Quality (Chemicals in what you eat, where was the food grown? Do we have soil results for what the food is taking in for nutrients)
 - AI integration to detect anomalies and potential outbreaks.
+- AI integration for document parsing and pull in codes to check them with nlm.
+- Use noremal code to parse structured data for lookups. Like PDF, Excel... with appropriate parsers.
 - Natural and functional medicine approaches as well as western medicine.
 - Transparency and informed consent.
 - Disease discovery from ICD-10 codes alerts to Kafka for interested systems
